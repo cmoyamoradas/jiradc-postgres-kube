@@ -13,7 +13,7 @@ Kubernetes manifests to deploy a Jira Software Data Center with Postgres, Ingres
 - Deploy an Ingress object
 - Setup Metallb load balancer
 - Scaling the Jira Software Data Center cluster
-- 
+
 ## Pre-requisites
 - You need a Kubernetes cluster up-and-running in order to run this example. For that, you can follow the instructions in Setup Kubernetes cluster with Ansible or proceed with any other setup that will bring you to the same goal.
 - You need a shared storage. For this example, we will use an external server (external to the Kubernetes cluster, I mean) and NFS protocol. In the following sections we’re going to describe how to configure this.
@@ -362,8 +362,8 @@ nfs-pod-provisioner-54499dd8ff-x9lt7   1/1     Running   0          51m
 postgres-6997bbb746-v6cmp              1/1     Running   0          30m
 
 kubi@master ~]$ kubectl apply -f jira-dc-svc.yaml 
-
 service/jira-dc created
+
 [kubi@master ~]$ kubectl get svc
 NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                               AGE
 jira-dc      ClusterIP   None           <none>        80/TCP,8888/TCP,40001/TCP,40011/TCP   6s
@@ -375,8 +375,7 @@ postgres     ClusterIP   10.96.123.91   <none>        5432/TCP                  
 As per Kubernetes official documentation, an Ingress object may provide load balancing, SSL termination and name-based virtual hosting. We require this kind of object to load balance our Jira Software Data Center multi-node deployment.
 
 You must have an Ingress controller to satisfy an Ingress. For this example, we’re using the Nginx Ingress Controller officially supported by Kubernetes. We follow the instructions to install it in a Bare-metal scenario:
-
-
+```
 [kubi@master ~]$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.0/deploy/static/provider/baremetal/deploy.yaml
 namespace/ingress-nginx created
 serviceaccount/ingress-nginx created
@@ -402,9 +401,10 @@ job.batch/ingress-nginx-admission-patch created
 NAME                                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
 ingress-nginx-controller             NodePort    10.100.176.3    <none>        80:32400/TCP,443:32320/TCP   37s
 ingress-nginx-controller-admission   ClusterIP   10.96.122.129   <none>        443/TCP                      38s
+```
+
 By default, this installation works in “NopePort” mode. We need to change that to “LoadBalancer”, because we plan to use a separate LoadBalancer who will be responsible to allocate external IPs to our cluster.
-
-
+```
 [kubi@master ~]$ kubectl edit service ingress-nginx-controller -n ingress-nginx
 service/ingress-nginx-controller edited
 
@@ -412,45 +412,50 @@ service/ingress-nginx-controller edited
   
   sessionAffinity: None
   type: LoadBalancer # Previous value was NodePort
-
+```
+```
 kubi@master ~]$ kubectl get services -n ingress-nginx
 NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
 ingress-nginx-controller             LoadBalancer   10.100.176.3    <pending>     80:32400/TCP,443:32320/TCP   2m27s
 ingress-nginx-controller-admission   ClusterIP      10.96.122.129   <none>        443/TCP                      2m28s
 Deploy an Ingress object
-
+```
+```
 [kubi@master ~]$ kubectl apply -f jira-dc-ingress.yaml 
 ingress.networking.k8s.io/jira-dc-ingress created
 
 [kubi@master ~]$ kubectl get ingress
 NAME              CLASS   HOSTS   ADDRESS   PORTS   AGE
 jira-dc-ingress   nginx   *                 80      16s
-Setup Metallb load balancer
+```
+
+## Setup Metallb load balancer
 We follow the instructions to Install Metallb on Kubernetes cluster described in Exposing a service outside of a Kubernetes cluster using MetalLB LoadBalancer | Installing-MetalLB 
 
 After having followed the installation process, if we have a look at the ingress services, we should already see that an external IP has been assigned to the controller:
-
-
+```
 [kubi@master ~]$ kubectl get services -n ingress-nginx
 NAME                                 TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
 ingress-nginx-controller             LoadBalancer   10.101.80.192   10.0.2.25     80:31742/TCP,443:31578/TCP   18m
 ingress-nginx-controller-admission   ClusterIP      10.109.10.92    <none>        443/TCP                      18m
-The IP address that appears in the EXTERNAL-IP section of the ingress-nginx-controller is the one through which we can access to our Jira Software Data Center application.kubectl 
+```
+
+The IP address that appears in the EXTERNAL-IP section of the ingress-nginx-controller is the one through which we can access to our Jira Software Data Center application. 
 
 We have to connect to the Jira application and finish the setup process before scaling the cluster from 1 node to 2
 
-Scaling the Jira Software Data Center cluster
+## Scaling the Jira Software Data Center cluster
 For now, we have just 1 node in the cluster:
-
-
+```
 [kubi@master ~]$ kubectl get pods
 NAME                                   READY   STATUS    RESTARTS   AGE
 jira-dc-0                              1/1     Running   0          7m38s
 nfs-pod-provisioner-54499dd8ff-4qmkt   1/1     Running   1          19d
 postgres-6997bbb746-lf5nd              1/1     Running   1          19d
+```
+
 To scale it, what we have to do is scaling the statefulset previously deployed:
-
-
+```
 [kubi@master ~]$ kubectl scale statefulset jira-dc --replicas=2
 statefulset.apps/jira-dc scaled
 
@@ -460,3 +465,4 @@ jira-dc-0                              1/1     Running   0          9m47s
 jira-dc-1                              1/1     Running   0          27s
 nfs-pod-provisioner-54499dd8ff-4qmkt   1/1     Running   1          19d
 postgres-6997bbb746-lf5nd              1/1     Running   1          19d
+```
