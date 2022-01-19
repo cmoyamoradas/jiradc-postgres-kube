@@ -3,33 +3,24 @@
 Kubernetes manifests to deploy a Jira Software Data Center with Postgres, Ingress Nginx and Metallb
 
 ## On this page
+- Pre-requisites
+- Setup a NFS Server
+- Setup NFS Clients
+- Dynamic NFS provisioning
+- Deploying PostgreSQL instance
+- Deploying a Jira Software Data Center cluster
+- Setup an Ingress Controller
+- Deploy an Ingress object
+- Setup Metallb load balancer
+- Scaling the Jira Software Data Center cluster
+- 
+## Pre-requisites
+- You need a Kubernetes cluster up-and-running in order to run this example. For that, you can follow the instructions in Setup Kubernetes cluster with Ansible or proceed with any other setup that will bring you to the same goal.
+- You need a shared storage. For this example, we will use an external server (external to the Kubernetes cluster, I mean) and NFS protocol. In the following sections we’re going to describe how to configure this.
+- You need to deploy a PostgreSQL instance on the cluster. For this example, we’re going to setup a single instance of a PostgreSQL database.
+- You need to setup a load balancer to provision an external IP to make accessible the application from outside of the Kubernetes cluster.
 
-Pre-requisites
-Setup a NFS Server
-Setup NFS Clients
-Dynamic NFS provisioning
-Deploying PostgreSQL instance
-Deploying a Jira Software Data Center cluster
-Setup an Ingress Controller
-Deploy an Ingress object
-Setup Metallb load balancer
-Scaling the Jira Software Data Center cluster
-Pre-requisites
-You need a Kubernetes cluster up-and-running in order to run this example. For that, you can follow the instructions in Setup Kubernetes cluster with Ansible or proceed with any other setup that will bring you to the same goal.
-
-You need a shared storage. For this example, we will use an external server (external to the Kubernetes cluster, I mean) and NFS protocol. In the following sections we’re going to describe how to configure this.
-
-You need to deploy a PostgreSQL instance on the cluster. For this example, we’re going to setup a single instance of a PostgreSQL database.
-
-You need to setup a load balancer to provision an external IP to make accessible the application from outside of the Kubernetes cluster.
-
-You need to clone the following two repositories:
-
-https://bitbucket.org/cmoyamoradas/jira-k8s/src/master/ - Restricted link, try another account
-
-https://bitbucket.org/cmoyamoradas/postgresql-k8s/src/master/ - Restricted link, try another account 
-
-Setup a NFS Server
+## Setup a NFS Server
 If we have setup the Kubernetes cluster following the instructions in Setup Kubernetes cluster with Ansible, we will consider that we’re setting up the NFS Server on CentOS 7, to stay consistent with the other servers.
 
 Procedure and commands may be different from other Linux distributions. 
@@ -41,21 +32,18 @@ $ sudo yum install nfs-utils
 ``` 
 
 Now we create the folder that will be shared by NFS:
-
-
+```
 $ sudo mkdir /var/nfsshare
- 
+``` 
 
 We change the permissions of the folder as follows:
-
-
+```
 $ sudo chmod -R 755 /var/nfsshare
 $ sudo chown -R nfsnobody:nfsnobody /var/nfsshare
- 
+``` 
 
 Next, we need to start the services and enable them to be started at boot time:
-
-
+```
 $ sudo systemctl enable rpcbind
 $ sudo systemctl enable nfs-server
 $ sudo systemctl enable nfs-lock
