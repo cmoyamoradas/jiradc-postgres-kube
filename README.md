@@ -225,48 +225,38 @@ nfs-pod-provisioner-54499dd8ff-x9lt7   1/1     Running   0          34s
 For this example, we’re going to use PostgreSQL as database. We just need to setup a single instance. For that, we’ll follow the steps below:
 
 We deploy a ConfigMap with the configuration of our instance:
-
-
-
+```
 [kubi@master ~]$ kubectl apply -f postgres-config.yaml 
 configmap/postgres-config created
- 
+``` 
 
 We create a PersistentVolume manually:
-
-
-
+```
 [kubi@master ~]$ kubectl apply -f postgres-pv-nfs.yaml
 persistentvolume/postgres-pv-nfs-volume created
 
 [kubi@master ~]$ kubectl get pv
 NAME                     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM                                          STORAGECLASS       REASON   AGE
 postgres-pv-nfs-volume   2Gi        RWO            Retain           Available   default/postgres-persistent-nfs-volume-claim   nfs-storageclass            8s
- 
+``` 
 
 We need a PersistentVolumeClaim. We create it manually:
-
-
-
+```
 [kubi@master ~]$ kubectl apply -f postgres-pvc-nfs.yaml 
 persistentvolumeclaim/postgres-persistent-nfs-volume-claim created
 
 [kubi@master ~]$ kubectl get pvc
 NAME                                   STATUS   VOLUME                   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
 postgres-persistent-nfs-volume-claim   Bound    postgres-pv-nfs-volume   2Gi        RWO            nfs-storageclass  5s
- 
+``` 
 
 Before to apply the Postgres deployment, we need to create manually the folder /var/nfsshare/pgdata in the NFS server:
-
-
-
+```
 [cmoya@storage ~]$ sudo mkdir /var/nfsshare/pgdata
- 
+``` 
 
 Now, we apply the Postgres deployment manifest:
-
-
-
+```
 [kubi@master ~]$ kubectl apply -f postgres-deployment-nfs.yaml 
 deployment.apps/postgres created
 
@@ -274,12 +264,10 @@ deployment.apps/postgres created
 NAME                                   READY   STATUS    RESTARTS   AGE
 nfs-pod-provisioner-54499dd8ff-x9lt7   1/1     Running   0          26m
 postgres-6997bbb746-v6cmp              1/1     Running   0          5m18s
- 
+``` 
 
 Let’s check that everything went well:
-
-
-
+```
 [kubi@master ~]$ kubectl logs postgres-6997bbb746-v6cmp
 The files belonging to this database system will be owned by user "postgres".
 This user must also own the server process.
@@ -322,12 +310,10 @@ LOG:  database system was shut down at 2020-09-02 13:57:02 UTC
 LOG:  MultiXact member wraparound protections are now enabled
 LOG:  database system is ready to accept connections
 LOG:  autovacuum launcher started
- 
+``` 
 
 Finally, we create a Service to make the database accessible inside the cluster:
-
-
-
+```
 [kubi@master ~]$ kubectl apply -f postgres-svc.yaml 
 service/postgres created
 
@@ -335,22 +321,21 @@ service/postgres created
 NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
 kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP    171m
 postgres     ClusterIP   10.96.123.91   <none>        5432/TCP   8s
- 
+``` 
 
-Deploying a Jira Software Data Center cluster
+## Deploying a Jira Software Data Center cluster
 To setup a Jira Software Data Center cluster in Kubernetes, we will require the following objects:
 
-A ConfigMap, that we’ll use to configure most of the properties of our Jira Software cluster.
+- A ConfigMap, that we’ll use to configure most of the properties of our Jira Software cluster.
 
-A PersistentVolumeClaim, that we’ll create manually because we just need one shared volume across the cluster.
+- A PersistentVolumeClaim, that we’ll create manually because we just need one shared volume across the cluster.
 
-A Statefulset, that is a specific way to deploy an application cluster, offering advanced features not present in a normal Deployment object
+- A Statefulset, that is a specific way to deploy an application cluster, offering advanced features not present in a normal Deployment object
 
-A Service, to make accessible the pods inside the Kubernetes cluster
+- A Service, to make accessible the pods inside the Kubernetes cluster
 
 Let’s start:
-
-
+```
 [kubi@master ~]$ kubectl apply -f jira-dc-config.yaml 
 configmap/jira-dc-config created
 
@@ -384,7 +369,9 @@ NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                   
 jira-dc      ClusterIP   None           <none>        80/TCP,8888/TCP,40001/TCP,40011/TCP   6s
 kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP                               3h14m
 postgres     ClusterIP   10.96.123.91   <none>        5432/TCP                              23m
-Setup an Ingress Controller
+```
+
+## Setup an Ingress Controller
 As per Kubernetes official documentation, an Ingress object may provide load balancing, SSL termination and name-based virtual hosting. We require this kind of object to load balance our Jira Software Data Center multi-node deployment.
 
 You must have an Ingress controller to satisfy an Ingress. For this example, we’re using the Nginx Ingress Controller officially supported by Kubernetes. We follow the instructions to install it in a Bare-metal scenario:
