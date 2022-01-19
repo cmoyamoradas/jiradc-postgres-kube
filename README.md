@@ -83,7 +83,7 @@ $ sudo yum install nfs-utils
 ## Dynamic NFS provisioning
 In this example, we’re going to provision NFS resources in both manually and dynamically ways. For the dynamic NFS provisioning, we need to deploy a [nfs provisioner](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/) on our Kubernetes cluster. 
 
-There are some object to be created before deploying the nfs provisioner. First, we create a Service Account and some roles and role bindings required by Kubernetes:
+There are some object to be created before deploying the nfs provisioner. First, we create a [Service Account](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/) and some roles and role bindings required by Kubernetes:
 
 **rbac.yaml**
 ```
@@ -155,7 +155,7 @@ role.rbac.authorization.k8s.io/nfs-pod-provisioner-otherRoles created
 rolebinding.rbac.authorization.k8s.io/nfs-pod-provisioner-otherRoles created
 ```
 
-Second, we deploy a storage class:
+Second, we deploy a [storage class](https://kubernetes.io/docs/concepts/storage/storage-classes/):
 
 **nfs-class.yaml**
 ```
@@ -372,9 +372,9 @@ postgres     ClusterIP   10.96.123.91   <none>        5432/TCP                  
 ```
 
 ## Setup an Ingress Controller
-As per Kubernetes official documentation, an Ingress object may provide load balancing, SSL termination and name-based virtual hosting. We require this kind of object to load balance our Jira Software Data Center multi-node deployment.
+As per [Kubernetes official documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/), an **Ingress** object may provide load balancing, SSL termination and name-based virtual hosting. We require this kind of object to load balance our Jira Software Data Center multi-node deployment.
 
-You must have an Ingress controller to satisfy an Ingress. For this example, we’re using the Nginx Ingress Controller officially supported by Kubernetes. We follow the instructions to install it in a Bare-metal scenario:
+You must have an [Ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers) to satisfy an Ingress. For this example, we’re using the [Nginx Ingress Controller](https://github.com/kubernetes/ingress-nginx/blob/master/README.md) officially supported by Kubernetes. We follow the instructions to install it in a [Bare-metal scenario](https://kubernetes.github.io/ingress-nginx/deploy/#bare-metal):
 ```
 [kubi@master ~]$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.0/deploy/static/provider/baremetal/deploy.yaml
 namespace/ingress-nginx created
@@ -430,7 +430,7 @@ jira-dc-ingress   nginx   *                 80      16s
 ```
 
 ## Setup Metallb load balancer
-We follow the instructions to Install Metallb on Kubernetes cluster described in Exposing a service outside of a Kubernetes cluster using MetalLB LoadBalancer | Installing-MetalLB 
+We follow the instructions to Install Metallb on Kubernetes cluster described in the [MetalLB official documentation](https://metallb.universe.tf/installation/) 
 
 After having followed the installation process, if we have a look at the ingress services, we should already see that an external IP has been assigned to the controller:
 ```
