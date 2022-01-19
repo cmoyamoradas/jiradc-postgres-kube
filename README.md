@@ -38,7 +38,7 @@ Let’s install the packages on the server we’re using like storage unit
 
 ```
 $ sudo yum install nfs-utils
- 
+``` 
 
 Now we create the folder that will be shared by NFS:
 
