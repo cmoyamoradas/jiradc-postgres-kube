@@ -81,7 +81,7 @@ $ sudo yum install nfs-utils
 ```
 
 ## Dynamic NFS provisioning
-In this example, we’re going to provision NFS resources in both manually and dynamically ways. For the dynamic NFS provisioning, we need to deploy a [nfs provisioner|https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/] on our Kubernetes cluster. 
+In this example, we’re going to provision NFS resources in both manually and dynamically ways. For the dynamic NFS provisioning, we need to deploy a [https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/|nfs provisioner] on our Kubernetes cluster. 
 
 There are some object to be created before deploying the nfs provisioner. First, we create a Service Account and some roles and role bindings required by Kubernetes:
 
