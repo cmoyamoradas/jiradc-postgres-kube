@@ -1,7 +1,8 @@
-# jiradc-postgres-kube
+# Deploy Jira Data Center on a Kubernetes cluster
+
 Kubernetes manifests to deploy a Jira Software Data Center with Postgres, Ingress Nginx and Metallb
 
-On this page
+## On this page
 
 Pre-requisites
 Setup a NFS Server
@@ -35,7 +36,7 @@ Procedure and commands may be different from other Linux distributions.
 
 Let’s install the packages on the server we’re using like storage unit
 
-
+```
 $ sudo yum install nfs-utils
  
 
