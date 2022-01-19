@@ -15,13 +15,13 @@ Kubernetes manifests to deploy a Jira Software Data Center with Postgres, Ingres
 - Scaling the Jira Software Data Center cluster
 
 ## Pre-requisites
-- You need a Kubernetes cluster up-and-running in order to run this example. For that, you can follow the instructions in Setup Kubernetes cluster with Ansible or proceed with any other setup that will bring you to the same goal.
+- You need a Kubernetes cluster up-and-running in order to run this example.
 - You need a shared storage. For this example, we will use an external server (external to the Kubernetes cluster, I mean) and NFS protocol. In the following sections we’re going to describe how to configure this.
 - You need to deploy a PostgreSQL instance on the cluster. For this example, we’re going to setup a single instance of a PostgreSQL database.
 - You need to setup a load balancer to provision an external IP to make accessible the application from outside of the Kubernetes cluster.
 
 ## Setup a NFS Server
-If we have setup the Kubernetes cluster following the instructions in Setup Kubernetes cluster with Ansible, we will consider that we’re setting up the NFS Server on CentOS 7, to stay consistent with the other servers.
+I will consider that we’re setting up the NFS Server on CentOS 7, to stay consistent with the other servers.
 
 Procedure and commands may be different from other Linux distributions. 
 
@@ -81,7 +81,7 @@ $ sudo yum install nfs-utils
 ```
 
 ## Dynamic NFS provisioning
-In this example, we’re going to provision NFS resources in both manually and dynamically ways. For the dynamic NFS provisioning, we need to deploy a nfs provisioner on our Kubernetes cluster. 
+In this example, we’re going to provision NFS resources in both manually and dynamically ways. For the dynamic NFS provisioning, we need to deploy a [nfs provisioner|https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/] on our Kubernetes cluster. 
 
 There are some object to be created before deploying the nfs provisioner. First, we create a Service Account and some roles and role bindings required by Kubernetes:
 
