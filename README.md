@@ -52,46 +52,41 @@ $ sudo systemctl start rpcbind
 $ sudo systemctl start nfs-server
 $ sudo systemctl start nfs-lock
 $ sudo systemctl start nfs-idmap
- 
+``` 
 
 Now, we share the NFS folder over the network as follows:
-
-
-
+```
 $ sudo vi /etc/exports
 /etc/exports
 
-
 # '*' enables any IP to access to the NFS folder
 /var/nfsshare    *(rw,sync,no_root_squash,no_all_squash)
- 
+``` 
 
 We restart the NFS service:
-
-
-
+```
 $ sudo systemctl restart nfs-server
- 
+``` 
 
 Finally, it’s better if we stop and disable the firewall (not recommended in production environments):
-
-
-
+```
 $ sudo systemctl stop firewalld
 $ sudo systemctl disable firewalld
-Setup NFS Clients
+```
+
+## Setup NFS Clients
 The NFS clients will be the Kubernetes cluster worker nodes. Thus, on both servers, worker1 and worker2, we have to install the nfs-utils package, as we did on the NFS server:
-
-
+```
 $ sudo yum install nfs-utils
-Dynamic NFS provisioning
+```
+
+## Dynamic NFS provisioning
 In this example, we’re going to provision NFS resources in both manually and dynamically ways. For the dynamic NFS provisioning, we need to deploy a nfs provisioner on our Kubernetes cluster. 
 
 There are some object to be created before deploying the nfs provisioner. First, we create a Service Account and some roles and role bindings required by Kubernetes:
 
-rbac.yaml
-
-
+**rbac.yaml**
+```
 kind: ServiceAccount
 apiVersion: v1
 metadata:
@@ -150,18 +145,20 @@ roleRef:
   kind: Role
   name: nfs-pod-provisioner-otherRoles
   apiGroup: rbac.authorization.k8s.io
-
+```
+```
 [kubi@master ~]$ kubectl apply -f rbac.yaml
 serviceaccount/nfs-pod-provisioner-sa created
 clusterrole.rbac.authorization.k8s.io/nfs-provisioner-clusterRole created
 clusterrolebinding.rbac.authorization.k8s.io/nfs-provisioner-rolebinding created
 role.rbac.authorization.k8s.io/nfs-pod-provisioner-otherRoles created
 rolebinding.rbac.authorization.k8s.io/nfs-pod-provisioner-otherRoles created
+```
+
 Second, we deploy a storage class:
 
-nfs-class.yaml
-
-
+**nfs-class.yaml**
+```
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -169,14 +166,16 @@ metadata:
 provisioner: nfs-pod-provisioner # name can be anything
 parameters:
   archiveOnDelete: "false"
-
+```
+```
 kubi@master ~]$ kubectl apply -f nfs-class.yaml
 storageclass.storage.k8s.io/nfs-storageclass created
+```
+
 And finally, we can proceed with the deploy of the nfs provisioner:
 
-nfs-provisioner-deployment.yaml
-
-
+**nfs-provisioner-deployment.yaml**
+```
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -212,14 +211,17 @@ spec:
          nfs:
            server: 10.0.2.15 # Ip of the NFS SERVER
            path: /var/nfsshare # path to nfs directory setup
-
+```
+```
 [kubi@master ~]$ kubectl apply -f nfs-provisioner-deployment.yaml 
 deployment.apps/nfs-pod-provisioner created
 
 [kubi@master  ~]$ kubectl get pods
 NAME                                   READY   STATUS    RESTARTS   AGE
 nfs-pod-provisioner-54499dd8ff-x9lt7   1/1     Running   0          34s
-Deploying PostgreSQL instance
+```
+
+## Deploying PostgreSQL instance
 For this example, we’re going to use PostgreSQL as database. We just need to setup a single instance. For that, we’ll follow the steps below:
 
 We deploy a ConfigMap with the configuration of our instance:
